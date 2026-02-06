@@ -1,3 +1,10 @@
+export type Comment = {
+  id: string;
+  author: string;
+  content: string;
+  date: string;
+};
+
 export type Blog = {
   id: string;
   title: string;
@@ -11,9 +18,10 @@ export type Blog = {
   image: string;
   category: string;
   tags: string[];
+  comments: Comment[];
 };
 
-const categories = ["Design", "Development", "UX", "Security", "Architecture", "AI", "Cloud", "Soft Skills"];
+export const categories = ["Design", "Development", "UX", "Security", "Architecture", "AI", "Cloud", "Soft Skills"];
 const authors = [
   { name: "Alex Rivers", role: "Senior UI Designer" },
   { name: "Sarah Code", role: "Full Stack Developer" },
@@ -78,6 +86,24 @@ const quotes = [
   "The only way to do great work is to love what you do. - Steve Jobs"
 ];
 
+const commentAuthors = [
+  "Jamie Tech", "Dev Dan", "UX Luna", "Cloud Chris", "Archi Amy",
+  "Security Sam", "Soft Skill Sue", "Frontend Frank", "Backend Barb", "Fullstack Fred"
+];
+
+const commentContents = [
+  "This is a fantastic deep dive! I've been looking for something this detailed about {cat}.",
+  "Interesting perspective on {cat}. I hadn't considered the impact of human-centric design in this context.",
+  "Great article! The point about modular architectures really resonated with me.",
+  "Thanks for sharing these technical strategies. I'll definitely be trying some of these in my next project.",
+  "The outlook for 2026 seems spot on. Agility is definitely going to be the key differentiator.",
+  "I'm a bit skeptical about the AI integration part, but you make a compelling case for its necessity.",
+  "Excellent summary. Do you have any additional resources you'd recommend for learning more about {cat}?",
+  "Love the layout and the content. Very professional and insightful.",
+  "As someone working in {cat}, I find your analysis very accurate and helpful.",
+  "Keep up the great work! Your blogs are always a highlight of my week."
+];
+
 function generateBlogs(count: number): Blog[] {
   const generated: Blog[] = [];
   const now = new Date("2026-02-06").getTime();
@@ -89,16 +115,24 @@ function generateBlogs(count: number): Blog[] {
     const imgBase = images[i % images.length];
     const titleBase = titles[i % titles.length];
 
-    const timestamp = now - (i * 2 * dayInMs) - (Math.random() * dayInMs);
+    // Use deterministic random values based on index i
+    const randomOffset = (i * 1337) % dayInMs;
+    const timestamp = now - (i * 2 * dayInMs) - randomOffset;
     const dateObj = new Date(timestamp);
-    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
+
+    // Stable date formatting: Jan 01, 26
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const dateStr = `${months[dateObj.getMonth()]} ${String(dateObj.getDate()).padStart(2, '0')}, ${String(dateObj.getFullYear()).slice(-2)}`;
 
     // Assemble dynamic content
     const intro = intros[i % intros.length].replace(/{cat}/g, cat);
-    const sections = bodySections
-      .sort(() => 0.5 - Math.random()) // Randomize section order slightly for variety
-      .slice(0, 4) // Pick 4 sections
-      .map(s => `<h3>${s.heading}</h3><p>${s.content.replace(/{cat}/g, cat)}</p>`)
+
+    // Deterministic section selection and ordering
+    const sections = [...bodySections]
+      .map((s, idx) => ({ s, sortKey: (idx + i) % bodySections.length }))
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .slice(0, 4)
+      .map(item => `<h3>${item.s.heading}</h3><p>${item.s.content.replace(/{cat}/g, cat)}</p>`)
       .join("");
 
     const quote = quotes[i % quotes.length];
@@ -110,6 +144,24 @@ function generateBlogs(count: number): Blog[] {
     // Estimate read time based on word count (approx 200 words per minute)
     const wordCount = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
     const readTimeMinutes = Math.max(5, Math.ceil(wordCount / 180));
+
+    // Generate 10-30 comments deterministically
+    const numComments = 10 + (i % 21);
+    const blogComments: Comment[] = [];
+    for (let j = 0; j < numComments; j++) {
+      const cAuth = commentAuthors[(i + j) % commentAuthors.length];
+      const cContent = commentContents[(i * j) % commentContents.length].replace(/{cat}/g, cat);
+      const cDayOffset = (i + j) % 5;
+      const cDateObj = new Date(timestamp + (cDayOffset * dayInMs / 24)); // Comments slightly after post
+      const cDateStr = `${months[cDateObj.getMonth()]} ${String(cDateObj.getDate()).padStart(2, '0')}, ${String(cDateObj.getFullYear()).slice(-2)}`;
+
+      blogComments.push({
+        id: `c-${i}-${j}`,
+        author: cAuth,
+        content: cContent,
+        date: cDateStr
+      });
+    }
 
     generated.push({
       id: i.toString(),
@@ -123,7 +175,8 @@ function generateBlogs(count: number): Blog[] {
       readTime: `${readTimeMinutes} min read`,
       image: `${imgBase}?q=80&w=2670&auto=format&fit=crop`,
       category: cat,
-      tags: [cat, "Insights", "2026", "Tech"]
+      tags: [cat, "Insights", "2026", "Tech"],
+      comments: blogComments
     });
   }
   return generated;

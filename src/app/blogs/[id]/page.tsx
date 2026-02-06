@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Calendar, User, Clock, Tag, Share2, Sparkles } from "lucide-react";
 import { blogs } from "@/lib/data";
 import BlogCard from "@/components/ui/BlogCard";
+import BlogComments from "@/components/ui/BlogComments";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -144,6 +145,8 @@ export default async function BlogDetailPage({ params }: PageProps) {
                             </div>
                         </div>
                     </div>
+
+                    <BlogComments blogId={blog.id} initialComments={blog.comments} />
                 </div>
 
                 {/* Right / Newsletter / CTA */}
