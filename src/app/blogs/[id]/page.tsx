@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Calendar, User, Clock, Tag, Share2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, User, Clock, Tag, Share2, Sparkles } from "lucide-react";
 import { blogs } from "@/lib/data";
 import BlogCard from "@/components/ui/BlogCard";
 
@@ -85,6 +85,18 @@ export default async function BlogDetailPage({ params }: PageProps) {
                 {/* Left Sidebar / Meta */}
                 <aside className="lg:col-span-3 lg:block hidden">
                     <div className="sticky top-32 space-y-12">
+                        {/* New: Analyze Action */}
+                        <div className="p-1 rounded-2xl bg-gradient-to-r from-primary to-purple-500 shadow-lg shadow-primary/20">
+                             <div className="bg-card rounded-xl p-2 border border-transparent">
+                                <Link 
+                                    href={`/review-blog?id=${blog.id}`} 
+                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-md"
+                                >
+                                    <Sparkles className="w-4 h-4" /> Review this Blog
+                                </Link>
+                             </div>
+                        </div>
+
                         <div>
                             <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Share this story</h4>
                             <div className="flex gap-2">
